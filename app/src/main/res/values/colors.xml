@@ -2,7 +2,7 @@
 <resources>
 
     <!-- Color principal de la app -->
-    <color name="primary">#00AEEF</color>
+    <color name="primary">#01516D</color>
 
     <!-- Color principal oscuro -->
     <color name="primary_dark">#007BA7</color>
@@ -15,11 +15,11 @@
     <color name="black">#000000</color>
 
     <!-- Fondo secundario -->
-    <color name="gray_light">#E0E0E0</color>
+    <color name="gray_light">#000000</color>
 
     <!-- Textos  -->
-    <color name="text_dark">#212121</color>
-    <color name="text_light">#BDBDBD</color>
+    <color name="text_dark">#FFFFFF</color>
+    <color name="text_light">#000000</color>
 
     <!-- Detalles  -->
     <color name="metal_silver">#C0C0C0</color>
