@@ -20,4 +20,12 @@
     <string name="recover_title">Recuperar Contraseña</string>
     <string name="recover_instruction">Ingresa tu correo para recuperar tu contraseña</string>
     <string name="send_button">Enviar</string>
+
+    <!-- TEXTOS PARA BLUETOOTH -->
+    <string name="bluetooth_enabled">Bluetooth ACTIVADO ✅</string>
+    <string name="bluetooth_disabled">Bluetooth DESACTIVADO ❌</string>
+    <string name="bluetooth_not_supported">Este dispositivo no soporta Bluetooth</string>
+    <string name="bluetooth_permission_denied">Se necesitan permisos de Bluetooth</string>
+    <string name="bluetooth_status">Estado de Bluetooth</string>
+
 </resources>

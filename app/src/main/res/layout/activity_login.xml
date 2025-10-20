@@ -87,6 +87,16 @@
             android:backgroundTint="@color/primary"
             android:layout_marginBottom="16dp" />
 
+        <!-- Verificar Bluetooth -->
+        <Button
+            android:id="@+id/checkBluetoothButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="🔵 Verificar Bluetooth"
+            android:textSize="16sp"
+            android:backgroundTint="@color/accent"
+            android:layout_marginBottom="16dp" />
+
         <!-- Texto: ¿No tienes cuenta? Regístrate -->
         <TextView
             android:id="@+id/registerTextView"

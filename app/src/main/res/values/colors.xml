@@ -15,7 +15,7 @@
     <color name="black">#000000</color>
 
     <!-- Fondo secundario -->
-    <color name="gray_light">#000000</color>
+    <color name="gray_light">#BABABA</color>
 
     <!-- Textos  -->
     <color name="text_dark">#FFFFFF</color>
