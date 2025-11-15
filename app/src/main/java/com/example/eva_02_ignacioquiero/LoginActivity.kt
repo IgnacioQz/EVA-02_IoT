@@ -103,7 +103,11 @@ class LoginActivity : AppCompatActivity() {
                 showAlert("Error", "Por favor ingresa un correo válido")
             }
             else -> {
-                showAlert("Éxito", "Inicio de sesión exitoso\n\nBienvenido: $email")
+                // LOGIN EXITOSO - Navegar a MainActivity
+                val intent = Intent(this, MainActivity::class.java)
+                intent.putExtra("USER_EMAIL", email) // Opcional: pasar el email
+                startActivity(intent)
+                finish() // Cerrar LoginActivity
             }
         }
     }

@@ -50,6 +50,11 @@
             android:name=".RecoverPasswordActivity"
             android:exported="false" />
 
+        <!-- Pantalla principal de noticias -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
