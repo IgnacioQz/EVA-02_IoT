@@ -3,9 +3,9 @@ package com.example.eva_02_ignacioquiero
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -13,11 +13,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.eva_02_ignacioquiero.firebase.FirebaseHelper
 import com.google.android.material.textfield.TextInputEditText
 
 class LoginActivity : AppCompatActivity() {
 
-    // Variables para elementos de la pantalla
     private lateinit var emailEditText: TextInputEditText
     private lateinit var passwordEditText: TextInputEditText
     private lateinit var loginButton: Button
@@ -25,11 +25,10 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var forgotPasswordTextView: TextView
     private lateinit var registerTextView: TextView
 
-    // Variable para el adaptador de Bluetooth
     private var bluetoothAdapter: BluetoothAdapter? = null
-
-    // Código de solicitud de permisos
     private val BLUETOOTH_PERMISSION_REQUEST_CODE = 100
+
+    private val firebaseHelper = FirebaseHelper()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,23 +36,26 @@ class LoginActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
 
-        // Inicializar Bluetooth
+        // Verificar si ya hay un usuario logueado
+        checkUserSession()
+
         initializeBluetooth()
-
-        // Inicializar vistas
         initializeViews()
-
-        // Configurar eventos
         setupListeners()
     }
 
+    private fun checkUserSession() {
+        if (firebaseHelper.isUserLoggedIn()) {
+            // Si ya hay sesión, ir directo a MainActivity
+            navigateToMain()
+        }
+    }
+
     private fun initializeBluetooth() {
-        // Para Android 12+ (API 31+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val bluetoothManager = getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
             bluetoothAdapter = bluetoothManager.adapter
         } else {
-            // Para versiones anteriores
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         }
     }
@@ -72,7 +74,6 @@ class LoginActivity : AppCompatActivity() {
             handleLogin()
         }
 
-        // botón de verificar Bluetooth
         checkBluetoothButton.setOnClickListener {
             checkBluetoothStatus()
         }
@@ -103,20 +104,56 @@ class LoginActivity : AppCompatActivity() {
                 showAlert("Error", "Por favor ingresa un correo válido")
             }
             else -> {
-                // LOGIN EXITOSO - Navegar a MainActivity
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("USER_EMAIL", email) // Opcional: pasar el email
-                startActivity(intent)
-                finish() // Cerrar LoginActivity
+                // Login con Firebase
+                loginWithFirebase(email, password)
             }
         }
     }
 
-    /**
-     * FUNCIÓN BONUS: Verificar el estado del Bluetooth
-     */
+    private fun loginWithFirebase(email: String, password: String) {
+        // Mostrar loading
+        setLoading(true)
+
+        firebaseHelper.loginUser(
+            email = email,
+            password = password,
+            onSuccess = { user ->
+                setLoading(false)
+
+                // Login exitoso - navegar a MainActivity
+                navigateToMain()
+            },
+            onFailure = { errorMessage ->
+                setLoading(false)
+                showAlert("Error al iniciar sesión", errorMessage)
+            }
+        )
+    }
+
+    private fun navigateToMain() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+
+    private fun setLoading(loading: Boolean) {
+        if (loading) {
+            loginButton.isEnabled = false
+            loginButton.text = "Iniciando sesión..."
+            emailEditText.isEnabled = false
+            passwordEditText.isEnabled = false
+        } else {
+            loginButton.isEnabled = true
+            loginButton.text = getString(R.string.login_button)
+            emailEditText.isEnabled = true
+            passwordEditText.isEnabled = true
+        }
+    }
+
+    // ... resto del código de Bluetooth sin cambios ...
+
     private fun checkBluetoothStatus() {
-        // Verificar si el dispositivo soporta Bluetooth
         if (bluetoothAdapter == null) {
             showAlert(
                 getString(R.string.bluetooth_status),
@@ -132,7 +169,6 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        // Obtener el estado del Bluetooth
         val isEnabled = try {
             bluetoothAdapter?.isEnabled ?: false
         } catch (e: SecurityException) {
@@ -189,7 +225,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -201,10 +236,8 @@ class LoginActivity : AppCompatActivity() {
             BLUETOOTH_PERMISSION_REQUEST_CODE -> {
                 if (grantResults.isNotEmpty() &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permiso concedido, verificar Bluetooth de nuevo
                     checkBluetoothStatus()
                 } else {
-                    // Permiso denegado
                     showAlert(
                         "Permiso Denegado",
                         "Se necesitan permisos de Bluetooth para verificar el estado.\n\n" +

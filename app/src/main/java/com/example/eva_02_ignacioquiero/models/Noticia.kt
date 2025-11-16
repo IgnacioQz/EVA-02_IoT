@@ -7,4 +7,7 @@ data class Noticia(
     val imagenUrl: String = "",
     val cuerpo: String,
     val fecha: String
-)
+){
+    // Constructor
+    constructor() : this("", "", "", "", "", "")
+}

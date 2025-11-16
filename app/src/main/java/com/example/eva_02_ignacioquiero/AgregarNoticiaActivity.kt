@@ -6,11 +6,12 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.eva_02_ignacioquiero.firebase.FirebaseHelper
+import com.example.eva_02_ignacioquiero.models.Noticia
 import com.google.android.material.textfield.TextInputEditText
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import java.util.UUID
 
 class AgregarNoticiaActivity : AppCompatActivity() {
 
@@ -23,6 +24,7 @@ class AgregarNoticiaActivity : AppCompatActivity() {
     private lateinit var guardarButton: Button
 
     private val calendar = Calendar.getInstance()
+    private val firebaseHelper = FirebaseHelper()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,17 +50,14 @@ class AgregarNoticiaActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        // Botón Cancelar
         cancelarButton.setOnClickListener {
             showCancelDialog()
         }
 
-        // Botón Guardar
         guardarButton.setOnClickListener {
             handleGuardarNoticia()
         }
 
-        // Campo Fecha - abrir DatePicker
         fechaEditText.setOnClickListener {
             showDatePicker()
         }
@@ -122,24 +121,58 @@ class AgregarNoticiaActivity : AppCompatActivity() {
                 showAlert("Error", "Por favor selecciona una fecha")
             }
             else -> {
-                // TODO: Aquí guardaremos en Firebase
-                // Por ahora solo mostramos confirmación
+                // Guardar noticia en Firebase
+                saveNoticiaToFirebase(titulo, bajada, imagenUrl, cuerpo, fecha)
+            }
+        }
+    }
 
-                val noticiaId = UUID.randomUUID().toString()
+    private fun saveNoticiaToFirebase(
+        titulo: String,
+        bajada: String,
+        imagenUrl: String,
+        cuerpo: String,
+        fecha: String
+    ) {
+        // Mostrar loading
+        setLoading(true)
+
+        // Crear objeto Noticia (el ID se generará automáticamente en FirebaseHelper)
+        val noticia = Noticia(
+            id = "", // Se generará automáticamente
+            titulo = titulo,
+            bajada = bajada,
+            imagenUrl = imagenUrl,
+            cuerpo = cuerpo,
+            fecha = fecha
+        )
+
+        firebaseHelper.saveNoticia(
+            noticia = noticia,
+            onSuccess = {
+                setLoading(false)
 
                 showSuccessDialog(
-                    """
-                    Noticia creada exitosamente:
-                    
-                    ID: $noticiaId
-                    Título: $titulo
-                    Bajada: ${bajada.take(50)}...
-                    Fecha: $fecha
-                    
-                    (Próximamente se guardará en Firebase)
-                    """.trimIndent()
+                    "¡Noticia publicada!",
+                    "La noticia \"$titulo\" ha sido publicada exitosamente."
                 )
+            },
+            onFailure = { errorMessage ->
+                setLoading(false)
+                showAlert("Error al guardar", errorMessage)
             }
+        )
+    }
+
+    private fun setLoading(loading: Boolean) {
+        if (loading) {
+            guardarButton.isEnabled = false
+            guardarButton.text = "Guardando..."
+            cancelarButton.isEnabled = false
+        } else {
+            guardarButton.isEnabled = true
+            guardarButton.text = "Guardar"
+            cancelarButton.isEnabled = true
         }
     }
 
@@ -157,9 +190,9 @@ class AgregarNoticiaActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showSuccessDialog(message: String) {
+    private fun showSuccessDialog(title: String, message: String) {
         AlertDialog.Builder(this)
-            .setTitle("¡Éxito!")
+            .setTitle(title)
             .setMessage(message)
             .setPositiveButton("Aceptar") { dialog, _ ->
                 dialog.dismiss()
